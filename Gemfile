@@ -1,0 +1,11 @@
+source 'https://rubygems.org'
+
+gem 'chainable_methods'
+gem 'dry-auto_inject'
+gem 'dry-container'
+gem 'pg'
+gem 'pry'
+gem 'pry-byebug'
+# gem 'pry-reload'
+gem 'rom'
+gem 'rom-sql'
