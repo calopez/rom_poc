@@ -16,6 +16,10 @@ module Persistence
         end
       end
 
+      def unordered
+        order(nil)
+      end
+
       def generate_descendant(parent, node)
         # Using Sequel would be
         # [

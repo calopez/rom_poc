@@ -16,13 +16,12 @@ module Persistence
       end
 
       def index
-        res = tree.dataset.select {
-          [
-            path_length,
-            ancestor.as(:node),
-            Sequel.string_agg(Sequel.cast_string(:descendant), '.').as(:descendants)
-          ]
-        }.where(path_length: 1).group(:path_length, :ancestor).unordered
+
+        tree.select do
+          [ancestor.as(:node),
+           string.string_agg(string.cast(descendant), '.').as(:path)]
+        end.where(path_length: 1).group(:path_length, :ancestor).unordered.to_a
+
         # res struct
         # e.g [{:path_length=>1, :node=>59, :descendants=>"60.61"},
         #      {:path_length=>1, :node=>56, :descendants=>"57.59"},
