@@ -1,21 +1,24 @@
 require 'rom'
 require 'rom-sql'
 require 'sequel'
+require 'sourcify'
 require_relative '../../container'
 
 require_relative './../../lib/relations/product_uom_categories'
 require_relative './../../lib/relations/product_uom'
 require_relative './../../lib/relations/products'
 require_relative './../../lib/relations/product_categories'
+require_relative './../../lib/relations/product_category_tree'
 require_relative './../../lib/repositories/product_category_repo'
 require_relative './../../lib/commands/create_uom_category'
 
-Sequel.extension :core_refinements
+Sequel.extension :core_refinements, :string_agg
+# Sequel.extension :s
 
 config = ROM::Configuration.new(
   :sql,
   'postgres://karlosandres@localhost:5432/todo_development',
-  extensions: %i[error_sql pg_array pg_json]
+  extensions: %i[error_sql pg_array pg_json string_agg]
 )
 # rom_config.plugin :sql, relations: :instrumentation do |plugin_config|
 #   plugin_config.notifications = notifications
@@ -34,6 +37,7 @@ config.plugin :sql, relations: :pg_explain
 
 config.register_relation(Persistence::Relations::ProductUom)
 config.register_relation(Persistence::Relations::ProductUomCategories)
+config.register_relation(Persistence::Relations::ProductCategoryTree)
 config.register_relation(Persistence::Relations::ProductCategories)
 config.register_relation(Persistence::Relations::Products)
 config.register_command(Persistence::Commands::CreateUomCategory)
@@ -47,10 +51,17 @@ def rom
 end
 
 def repo
-   Persistence::Repo::ProductCategory.new(rom)
+  Persistence::Repo::ProductCategory.new(rom)
 end
 
 def categories
-   rom.relations[:product_categories]
+  rom.relations[:product_categories]
 end
 
+def tree
+  rom.relations[:product_category_tree]
+end
+
+# tree.select do [path_length, ancestor, string::cast(:descendant).as(:hello)] end.where(path_length: 1)
+    # .group(:path_length, :ancestor)
+    # .unordered
