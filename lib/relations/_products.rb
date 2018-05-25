@@ -20,7 +20,3 @@ module Persistence
     end
   end
 end
-
-# rom = Container.resolve(:rom)
-# product = rom.relations[:products]
-# product.by_pk(1).combine(:suppliers).to_a
