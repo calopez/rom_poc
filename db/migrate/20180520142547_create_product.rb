@@ -1,7 +1,7 @@
 ROM::SQL.migration do
   change do
     create_table :products do
-      primary_key :id
+      Serial :id
       String :name, null: false
       BigDecimal :price
       Time :created_at

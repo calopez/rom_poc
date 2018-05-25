@@ -12,7 +12,6 @@ module Persistence
           belongs_to :product_categories,
                      as: :ancestors,
                      foreign_key: :descendant
-
         end
       end
 
@@ -20,39 +19,59 @@ module Persistence
         order(nil)
       end
 
-      def generate_descendant(parent, node)
-        # Using Sequel would be
-        # [
-        #   ancestor,
-        #   Sequel.as(Sequel.expr(path_length + 1), :path_length),
-        #   Sequel.as(node, :descendant)
-        # ]
+      def descendants(parent_id:)
+        where(ancestor: parent_id)
+      end
+
+      def all_descendants
+        exclude(path_length: 0)
+      end
+
+      def parent
+        exclude(ancestor: all_descendants.pluck(:descendant)).limit(1)
+      end
+
+      def tree
+        select do
+          [ancestor.as(:node),
+           string.string_agg(string.cast(descendant), '.').as(:descendants)]
+        end
+          .where(path_length: 1)
+          .group(:ancestor).unordered
+      end
+
+      def remove(id)
+        where(ancestor: id).changeset(:delete).commit
+      end
+
+      def generate(parent_id:, child_id:)
+
+        if limit(1).count.zero?
+          return [{ path_length: 0, ancestor: parent_id, descendant: child_id }]
+        end
+
         self_referencing_path = proc do
           [
-            `#{node}`.as(:ancestor),
+            `#{child_id}`.as(:ancestor),
             `0`.as(:path_length),
-            `#{node}`.as(:descendant)
+            `#{child_id}`.as(:descendant)
           ]
         end
         path_references = proc do
           [
             ancestor,
             `path_length + 1`.as(:path_length),
-            `#{node}`.as(:descendant)
+            `#{child_id}`.as(:descendant)
           ]
         end
-
         select(&path_references)
-          .where(descendant: parent)
+          .where(descendant: parent_id)
           .union(
             select(&self_referencing_path).limit(1),
             all:       true,
             from_self: false
           )
       end
-
-      private
-
     end
   end
 end

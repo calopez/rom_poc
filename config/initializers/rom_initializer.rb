@@ -62,6 +62,30 @@ def tree
   rom.relations[:product_category_tree]
 end
 
-# tree.select do [path_length, ancestor, string::cast(:descendant).as(:hello)] end.where(path_length: 1)
-    # .group(:path_length, :ancestor)
-    # .unordered
+def branch(parent, child)
+  repo.add(child, parent_id: parent[:id])
+end
+res = tree.parent.one
+r = repo.remove(res [:ancestor]) if res
+repo.add('All', parent_id: nil).tap do |all|
+  branch(all, 'Service').tap do |s|
+    branch(s, 'Maintenance')
+    branch(s, 'Devolution')
+    branch(s, 'Refund')
+  end
+  branch(all, 'Software').tap do |s|
+    branch(s, 'Financial')
+    branch(s, 'CRM')
+    branch(s, 'ERP')
+  end
+  branch(all, 'Physical').tap do |p|
+    branch(p, 'Prints') do |p|
+      branch(p, 'HP')
+      branch(p, 'Dell')
+    end
+    branch(p, 'Computers').tap do |c|
+      branch(c, 'Dell')
+      branch(c, 'Apple')
+    end
+  end
+end

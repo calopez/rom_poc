@@ -65,3 +65,11 @@ end
 # FROM `accounts`
 # INNER JOIN `user_accounts` ON (`accounts`.`id` = `user_accounts`.`account_id`)
 # INNER JOIN `users` ON (`user_accounts`.`user_id` = `users`.`id`) ORDER BY `accounts`.`id`"
+#
+
+user.join(:addresses, {user_id: :id}, table_alias: :bar)
+    .select{ [name, `bar.id` ]}
+    .where{ (bar[:id] =~ 1) & (name =~ 'carlos') }.to_a
+
+# I would expect as the table_alias option of `join` method
+# another thing I found is that I can access `bar.id` like `bar[:id]` in the select block

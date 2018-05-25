@@ -24,5 +24,3 @@ require_relative 'config/initializers/rom_initializer'
 # doc = Nokogiri::HTML.parse(response)
 # title = doc.css("H1").text
 #
-
-byebug

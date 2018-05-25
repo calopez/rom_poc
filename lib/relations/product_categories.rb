@@ -7,7 +7,7 @@ module Persistence
       schema(:product_categories, infer: true) do
         # attribute :id, Types::ForeignKey(:product_category_tree)
         associations do
-          has_many :products # possible wrong, needs through?
+          has_many :products
           has_many :product_category_tree,
                    as:      :subcategories,
                    foreign_key: :ancestor
@@ -15,10 +15,6 @@ module Persistence
                    as:        :parent_categories,
                    foreign_key: :descendant
         end
-      end
-
-      def create(category)
-        changeset(:create, name: category).map(:add_timestamps).commit
       end
 
       def path_to(category_id)
